@@ -1,4 +1,16 @@
-# Stage 1: Runtime
+# Stage 1: Build JAR using Maven and JDK 21
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
+
+WORKDIR /build
+
+# Copy pom.xml and source code to compile inside the container
+COPY pom.xml .
+COPY src ./src
+
+# Build the executable Spring Boot JAR
+RUN mvn clean package -DskipTests -B
+
+# Stage 2: Minimal runtime image
 FROM eclipse-temurin:21-jre-jammy
 
 LABEL maintainer="FreightFox Backend Assignment"
@@ -9,8 +21,8 @@ WORKDIR /app
 # Create non-root user for security best practice
 RUN groupadd -r spring && useradd -r -g spring spring
 
-# Copy pre-built JAR from target
-COPY target/tollplaza-service-1.0.0.jar app.jar
+# Copy compiled JAR from builder stage
+COPY --from=builder /build/target/tollplaza-service-1.0.0.jar app.jar
 COPY src/main/resources/data/toll_plaza_india.csv /app/data/toll_plaza_india.csv
 
 # Change ownership to non-root user
