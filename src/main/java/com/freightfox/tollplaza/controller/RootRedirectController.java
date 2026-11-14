@@ -16,3 +16,4 @@ public class RootRedirectController {
         return "redirect:/swagger-ui.html";
     }
 }
+

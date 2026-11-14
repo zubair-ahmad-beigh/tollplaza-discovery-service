@@ -125,5 +125,27 @@ public class TollPlazaController {
         TollPlazaResponse response = tollPlazaService.findTollPlazasBetweenPincodes(request);
         return ResponseEntity.ok(response);
     }
+
+    @org.springframework.web.bind.annotation.GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Find toll plazas between two Indian pincodes via GET query parameters",
+            description = "Calculates the driving route between source and destination pincodes passed as query parameters, or returns API usage."
+    )
+    public ResponseEntity<?> findTollPlazasGet(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String sourcePincode,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String destinationPincode) {
+
+        if (sourcePincode != null && destinationPincode != null) {
+            TollPlazaRequest request = new TollPlazaRequest(sourcePincode.trim(), destinationPincode.trim());
+            return ResponseEntity.ok(tollPlazaService.findTollPlazasBetweenPincodes(request));
+        }
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "status", "UP",
+                "service", "FreightFox Toll Plaza Discovery Service",
+                "usage", "Send a POST request with JSON body {'sourcePincode':'560064','destinationPincode':'411045'} or GET with query params '?sourcePincode=560064&destinationPincode=411045'",
+                "swaggerUi", "/swagger-ui.html"
+        ));
+    }
 }
 
