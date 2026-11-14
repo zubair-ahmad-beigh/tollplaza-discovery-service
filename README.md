@@ -428,30 +428,28 @@ Under **Advanced Settings**:
 
 Click **Create Web Service**. Render will automatically build the Docker image, run database migrations on startup, and seed the toll dataset from `toll_plaza_india.csv`.
 
-### Step 4: Verification & Live Health Checks (Placeholder URLs)
-Once the deployment finishes on Render, verify the service using your assigned Render URL:
-
-*Replace `https://<your-service-name>.onrender.com` with your actual Render deployment URL:*
+### Step 4: Verification & Live Health Checks
+The service is deployed and running on Render at `https://tollplaza-discovery-service.onrender.com`:
 
 1. **Actuator Health Check**:
    ```bash
-   curl https://<your-service-name>.onrender.com/actuator/health
+   curl https://tollplaza-discovery-service.onrender.com/actuator/health
    ```
    *Expected Response:* `{"status":"UP","components":{"db":{"status":"UP"}}}`
 
 2. **Swagger UI Interactive Documentation**:
    ```
-   https://<your-service-name>.onrender.com/swagger-ui.html
+   https://tollplaza-discovery-service.onrender.com/swagger-ui.html
    ```
 
 3. **OpenAPI Specification**:
    ```
-   https://<your-service-name>.onrender.com/v3/api-docs
+   https://tollplaza-discovery-service.onrender.com/v3/api-docs
    ```
 
 4. **Live Route & Toll Discovery Test**:
    ```bash
-   curl -X POST https://<your-service-name>.onrender.com/api/v1/toll-plazas \
+   curl -X POST https://tollplaza-discovery-service.onrender.com/api/v1/toll-plazas \
      -H "Content-Type: application/json" \
      -d '{"sourcePincode":"560064","destinationPincode":"411045"}'
    ```
