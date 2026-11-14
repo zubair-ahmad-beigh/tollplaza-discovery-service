@@ -36,9 +36,5 @@ EXPOSE 8080
 # Configure JVM memory limits and GC with IPv4 preference for cloud/NAT environments
 ENV JAVA_OPTS="-XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Djava.net.preferIPv4Stack=true"
 
-# Healthcheck targeting Actuator health endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
-
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
