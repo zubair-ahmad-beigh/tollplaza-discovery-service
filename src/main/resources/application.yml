@@ -1,0 +1,80 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tollplaza-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tollplaza_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  cache:
+    type: caffeine
+    cache-names:
+      - tollPlazasRouteCache
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=60m,recordStats
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Application specific settings
+app:
+  toll-data:
+    csv-path: ${TOLL_CSV_PATH:classpath:data/toll_plaza_india.csv}
+    auto-import-on-startup: true
+  geospatial:
+    # Corridor threshold distance in meters from the route polyline (default: 1000m)
+    corridor-threshold-meters: ${CORRIDOR_THRESHOLD_METERS:1000.0}
+  routing:
+    provider: ${ROUTING_PROVIDER:mappls}
+    osrm:
+      base-url: ${OSRM_BASE_URL:https://router.project-osrm.org}
+      timeout-seconds: 10
+    mappls:
+      api-key: ${MAPPLS_API_KEY:}
+      base-url: ${MAPPLS_BASE_URL:https://route.mappls.com/route/direction}
+      whitelisted-ip: ${MAPPLS_WHITELISTED_IP:157.48.9.232}
+      timeout-seconds: 15
+  geocoding:
+    provider: ${GEOCODING_PROVIDER:nominatim}
+    nominatim:
+      base-url: ${NOMINATIM_BASE_URL:https://nominatim.openstreetmap.org}
+      user-agent: "FreightFox-TollPlazaService/1.0"
+      timeout-seconds: 5
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+

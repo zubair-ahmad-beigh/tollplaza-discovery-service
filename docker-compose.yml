@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tollplaza-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tollplaza_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d tollplaza_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tollplaza-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tollplaza-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      MAPPLS_API_KEY: ${MAPPLS_API_KEY}
+      MAPPLS_BASE_URL: ${MAPPLS_BASE_URL:-https://route.mappls.com/route/direction}
+      MAPPLS_WHITELISTED_IP: ${MAPPLS_WHITELISTED_IP:-157.48.9.232}
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Djava.net.preferIPv4Stack=true"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tollplaza_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      TOLL_CSV_PATH: /app/data/toll_plaza_india.csv
+      CORRIDOR_THRESHOLD_METERS: 500.0
+      ROUTING_PROVIDER: ${ROUTING_PROVIDER:-mappls}
+      OSRM_BASE_URL: https://router.project-osrm.org
+      GEOCODING_PROVIDER: nominatim
+      NOMINATIM_BASE_URL: https://nominatim.openstreetmap.org
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    networks:
+      - tollplaza-network
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  tollplaza-network:
+    driver: bridge
